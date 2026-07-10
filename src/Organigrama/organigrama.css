@@ -1,13 +1,147 @@
-.organigrama-container {
-  padding: 40px;
+/* ============================================================
+   BOTÓN IMPORTAR DEL ENCABEZADO
+============================================================ */
 
-  overflow: auto;
+.organigrama-pagina__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
 }
 
-.organigrama-vacio {
-  font-size: 30px;
+.organigrama-pagina__boton-importar {
+  flex-shrink: 0;
+  min-width: 150px;
+  padding: 11px 18px;
+  color: #ffffff;
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
 
-  text-align: center;
+.organigrama-pagina__boton-importar:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
 
-  margin-top: 80px;
+.organigrama-pagina__boton-importar:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   SECCIONES
+============================================================ */
+
+.organigrama-pagina__seccion {
+  width: 100%;
+  margin-bottom: 25px;
+  scroll-margin-top: 20px;
+}
+
+/* ============================================================
+   CERRAR RESUMEN
+============================================================ */
+
+.organigrama-pagina__ultima-importacion {
+  position: relative;
+}
+
+.organigrama-pagina__cerrar-resumen {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: #166534;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.organigrama-pagina__cerrar-resumen:hover {
+  color: #ffffff;
+  background: #16a34a;
+}
+.organigrama-pagina__mensaje {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+  padding: 14px 48px 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.organigrama-pagina__mensaje--correcto {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.organigrama-pagina__mensaje--error {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.organigrama-pagina__mensaje button {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: currentColor;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.organigrama-pagina__mensaje button:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+@media (max-width: 768px) {
+  .organigrama-pagina__encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .organigrama-pagina__boton-importar {
+    width: 100%;
+  }
+}
+
+@media print {
+  .organigrama-pagina {
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .organigrama-pagina__encabezado,
+  .organigrama-pagina__ultima-importacion,
+  #seccion-importar-organigrama {
+    display: none;
+  }
+
+  .organigrama-pagina__seccion {
+    margin: 0;
+  }
 }

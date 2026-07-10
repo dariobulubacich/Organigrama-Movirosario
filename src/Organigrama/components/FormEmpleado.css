@@ -1,0 +1,306 @@
+.form-empleado {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #dfe4ea;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   ENCABEZADO
+============================================================ */
+
+.form-empleado__encabezado {
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-empleado__encabezado h2 {
+  margin: 0 0 8px;
+  color: #1e293b;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.form-empleado__encabezado p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   GRILLA
+============================================================ */
+
+.form-empleado__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.form-empleado__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.form-empleado__campo--doble {
+  grid-column: span 1;
+}
+
+.form-empleado__campo--completo {
+  grid-column: 1 / -1;
+}
+
+/* ============================================================
+   LABELS
+============================================================ */
+
+.form-empleado__campo label {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-empleado__campo label span {
+  margin-left: 4px;
+  color: #dc2626;
+}
+
+/* ============================================================
+   INPUTS Y SELECTS
+============================================================ */
+
+.form-empleado__campo input,
+.form-empleado__campo select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  color: #1f2937;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+  box-sizing: border-box;
+}
+
+.form-empleado__campo input:focus,
+.form-empleado__campo select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.form-empleado__campo input:disabled,
+.form-empleado__campo select:disabled {
+  color: #94a3b8;
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.form-empleado__campo input::placeholder {
+  color: #94a3b8;
+}
+
+.form-empleado__input--error {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* ============================================================
+   ERRORES
+============================================================ */
+
+.form-empleado__error {
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* ============================================================
+   CHECKBOX
+============================================================ */
+
+.form-empleado__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 10px 12px;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.form-empleado__checkbox input {
+  width: 18px;
+  height: 18px;
+  min-height: auto;
+  margin: 0;
+  padding: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.form-empleado__checkbox span {
+  margin: 0;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ============================================================
+   VISTA PREVIA DE FOTO
+============================================================ */
+
+.form-empleado__vista-previa {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.form-empleado__vista-previa span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-empleado__vista-previa img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  background: #e2e8f0;
+  border: 3px solid #dbeafe;
+  border-radius: 50%;
+}
+
+/* ============================================================
+   ACCIONES
+============================================================ */
+
+.form-empleado__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.form-empleado__boton {
+  min-width: 150px;
+  min-height: 42px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.form-empleado__boton:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.form-empleado__boton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.form-empleado__boton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-empleado__boton--principal {
+  color: #ffffff;
+  background: #2563eb;
+}
+
+.form-empleado__boton--principal:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.form-empleado__boton--secundario {
+  color: #374151;
+  background: #e5e7eb;
+}
+
+.form-empleado__boton--secundario:hover:not(:disabled) {
+  background: #d1d5db;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 760px) {
+  .form-empleado {
+    padding: 18px;
+  }
+
+  .form-empleado__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-empleado__campo--doble,
+  .form-empleado__campo--completo {
+    grid-column: auto;
+  }
+
+  .form-empleado__acciones {
+    flex-direction: column-reverse;
+  }
+
+  .form-empleado__boton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-empleado {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .form-empleado__encabezado h2 {
+    font-size: 22px;
+  }
+
+  .form-empleado__vista-previa {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ============================================================
+   IMPRESIÓN
+============================================================ */
+
+@media print {
+  .form-empleado {
+    display: none;
+  }
+}
