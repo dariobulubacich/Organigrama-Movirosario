@@ -1,0 +1,25 @@
+.nodo {
+  min-width: 180px;
+
+  color: white;
+
+  padding: 12px;
+
+  border-radius: 10px;
+
+  font-weight: bold;
+
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+
+  text-align: center;
+}
+
+.nombre {
+  font-size: 18px;
+}
+
+.cargo {
+  margin-top: 8px;
+
+  font-size: 14px;
+}

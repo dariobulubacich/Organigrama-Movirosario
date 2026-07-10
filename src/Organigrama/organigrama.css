@@ -1,0 +1,13 @@
+.organigrama-container {
+  padding: 40px;
+
+  overflow: auto;
+}
+
+.organigrama-vacio {
+  font-size: 30px;
+
+  text-align: center;
+
+  margin-top: 80px;
+}
