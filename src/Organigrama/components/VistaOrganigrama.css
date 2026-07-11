@@ -211,6 +211,160 @@
   font-weight: 700;
 }
 /* ============================================================
+   MENSAJE DE IMPRESIÓN Y PDF
+============================================================ */
+
+.vista-organigrama-salida-mensaje {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+  padding: 12px 45px 12px 15px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.vista-organigrama-salida-mensaje--correcto {
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+}
+
+.vista-organigrama-salida-mensaje--error {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.vista-organigrama-salida-mensaje button {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: currentColor;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.vista-organigrama-salida-mensaje button:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* ============================================================
+   PROCESANDO SALIDA
+============================================================ */
+
+.vista-organigrama-procesando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 13px 16px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.vista-organigrama-procesando__spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #bfdbfe;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: vista-organigrama-girar 0.8s linear infinite;
+}
+/* ============================================================
+   MENSAJE INFORMATIVO
+============================================================ */
+
+.vista-organigrama-salida-mensaje--informacion {
+  color: #1e40af;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+}
+
+/* ============================================================
+   ARRASTRAR NODOS
+============================================================ */
+
+.vista-organigrama .react-flow__node {
+  cursor: grab;
+}
+
+.vista-organigrama .react-flow__node.dragging {
+  z-index: 1000 !important;
+  cursor: grabbing;
+  opacity: 0.88;
+}
+
+.vista-organigrama .react-flow__node.dragging .nodo-empleado {
+  border-color: #2563eb;
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.2),
+    0 14px 35px rgba(15, 23, 42, 0.22);
+  transform: scale(1.03);
+}
+.nodo-empleado__expandir {
+  position: absolute;
+  right: 10px;
+  bottom: -17px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: #ffffff;
+  background: var(--nodo-color);
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 3px 9px rgba(15, 23, 42, 0.25);
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.nodo-empleado__expandir:hover {
+  transform: scale(1.12);
+  box-shadow: 0 5px 13px rgba(15, 23, 42, 0.3);
+}
+
+.nodo-empleado__expandir--abierto {
+  background: #dc2626;
+}
+@keyframes vista-organigrama-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media print {
+  .vista-organigrama-salida-mensaje,
+  .vista-organigrama-procesando {
+    display: none;
+  }
+}
+/* ============================================================
    RESPONSIVE
 ============================================================ */
 

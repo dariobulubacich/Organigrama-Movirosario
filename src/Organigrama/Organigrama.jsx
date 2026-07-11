@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 
 import ImportarExcel from "../organigrama/components/ImportarExcel";
-import VistaOrganigrama from "./organigrama/components/VistaOrganigrama";
-import FormEmpleado from "./organigrama/components/FormEmpleado";
+import VistaOrganigrama from "../organigrama/components/VistaOrganigrama";
+import FormEmpleado from "../organigrama/components/FormEmpleado";
 
 import {
   obtenerEmpleados,
@@ -289,20 +289,6 @@ export default function Organigrama() {
   }, []);
 
   /* ============================================================
-     IMPRESIÓN Y PDF
-  ============================================================ */
-
-  const handleImprimir = useCallback(() => {
-    window.print();
-  }, []);
-
-  const handleExportarPDF = useCallback(() => {
-    window.alert(
-      "La exportación a PDF se incorporará en la etapa de impresión y PDF.",
-    );
-  }, []);
-
-  /* ============================================================
      RENDER
   ============================================================ */
 
@@ -428,8 +414,6 @@ export default function Organigrama() {
           onAgregar={handleAgregarEmpleado}
           onEditar={handleEditarEmpleado}
           onEliminar={handleEliminarEmpleado}
-          onImprimir={handleImprimir}
-          onExportarPDF={handleExportarPDF}
         />
       </section>
     </main>
