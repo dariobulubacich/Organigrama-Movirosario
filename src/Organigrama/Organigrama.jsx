@@ -9,7 +9,7 @@ import {
   guardarEmpleado,
   actualizarEmpleado,
   desactivarEmpleado,
-} from "../organigrama/services/organigramaService";
+} from "./services/organigramaService";
 
 import "./organigrama.css";
 
