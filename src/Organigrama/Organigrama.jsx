@@ -3,10 +3,9 @@ import { useCallback, useState } from "react";
 import ImportarExcel from "./components/ImportarExcel";
 import VistaOrganigrama from "./components/VistaOrganigrama";
 import FormEmpleado from "./components/FormEmpleado";
-
 import {
-  obtenerEmpleados,
   obtenerEmpleado,
+  obtenerEmpleados,
   guardarEmpleado,
   actualizarEmpleado,
   desactivarEmpleado,
