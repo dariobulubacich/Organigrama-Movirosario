@@ -4,11 +4,11 @@ import dagre from "@dagrejs/dagre";
    CONFIGURACIÓN DE LOS NODOS
 ============================================================ */
 
-const ANCHO_NODO = 260;
-const ALTO_NODO = 145;
+const ANCHO_NODO = 280;
+const ALTO_NODO = 180;
 
-const SEPARACION_HORIZONTAL = 55;
-const SEPARACION_VERTICAL = 90;
+const SEPARACION_HORIZONTAL = 90;
+const SEPARACION_VERTICAL = 130;
 
 /* ============================================================
    FUNCIÓN PRINCIPAL
@@ -239,9 +239,9 @@ function aplicarDistribucionDagre(nodes, edges) {
 
     ranksep: SEPARACION_VERTICAL,
 
-    marginx: 50,
+    marginx: 80,
 
-    marginy: 50,
+    marginy: 80,
 
     /*
     |--------------------------------------------------------------------------

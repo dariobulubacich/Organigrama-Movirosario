@@ -57,6 +57,30 @@ function OrganigramaInterno({
   const { fitView, setCenter, zoomIn, zoomOut, getZoom, getIntersectingNodes } =
     useReactFlow();
 
+  /* ============================================================
+     CENTRAR EN NODO
+  ============================================================ */
+
+  const centrarEnNodo = useCallback(
+    (node) => {
+      if (!node) {
+        return;
+      }
+
+      const ancho = node.measured?.width || node.width || 280;
+      const alto = node.measured?.height || node.height || 180;
+
+      const centroX = node.position.x + ancho / 2;
+      const centroY = node.position.y + alto / 2;
+
+      setCenter(centroX, centroY, {
+        zoom: Math.max(getZoom(), 0.9),
+        duration: 500,
+      });
+    },
+    [setCenter, getZoom],
+  );
+
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
 
   const [edges, setEdges] = useState([]);
@@ -412,6 +436,52 @@ function OrganigramaInterno({
     [empleadosActivos, idsExpandidos],
   );
 
+  /* ============================================================
+     SELECCIONAR RESULTADO DEL DESPLEGABLE
+  ============================================================ */
+
+  const handleSeleccionarResultado = useCallback(
+    async (empleado) => {
+      if (!empleado) {
+        return;
+      }
+
+      setMensajeBusqueda("");
+      setMensajeSalida(null);
+
+      const idsNecesarios = obtenerCadenaSupervisores(
+        empleado,
+        empleadosActivos,
+      );
+
+      const nuevosIdsExpandidos = new Set(idsExpandidos);
+
+      idsNecesarios.forEach((id) => {
+        nuevosIdsExpandidos.add(String(id));
+      });
+
+      setIdsExpandidos(nuevosIdsExpandidos);
+      setEmpleadoSeleccionado(empleado);
+      setIdEmpleadoSeleccionado(empleado.idEmpleado);
+
+      await esperarRenderizadoCompleto();
+
+      const visibles = filtrarRamasVisibles(
+        empleadosActivos,
+        nuevosIdsExpandidos,
+      );
+
+      const nodo = construirOrganigramaFlow(visibles).nodes.find(
+        (item) => item.id === String(empleado.idEmpleado),
+      );
+
+      if (nodo) {
+        centrarEnNodo(nodo);
+      }
+    },
+    [empleadosActivos, idsExpandidos, centrarEnNodo],
+  );
+
   const handleLimpiarBusqueda = useCallback(() => {
     setMensajeBusqueda("");
     setEmpleadoSeleccionado(null);
@@ -425,33 +495,6 @@ function OrganigramaInterno({
 
     setIdsExpandidos(new Set());
   }, []);
-
-  /* ============================================================
-     CENTRAR EN NODO
-  ============================================================ */
-
-  const centrarEnNodo = useCallback(
-    (node) => {
-      if (!node) {
-        return;
-      }
-
-      const ancho = node.measured?.width || node.width || 260;
-
-      const alto = node.measured?.height || node.height || 145;
-
-      const centroX = node.position.x + ancho / 2;
-
-      const centroY = node.position.y + alto / 2;
-
-      setCenter(centroX, centroY, {
-        zoom: Math.max(getZoom(), 0.9),
-
-        duration: 500,
-      });
-    },
-    [setCenter, getZoom],
-  );
 
   /* ============================================================
      CONTROLES DE VISTA
@@ -909,9 +952,11 @@ function OrganigramaInterno({
     <div className="vista-organigrama-contenedor">
       <BarraHerramientas
         cantidadEmpleados={empleadosActivos.length}
+        empleados={empleadosActivos}
         buscando={buscando}
         empleadoSeleccionado={empleadoSeleccionado}
         onBuscar={handleBuscar}
+        onSeleccionarResultado={handleSeleccionarResultado}
         onLimpiarBusqueda={handleLimpiarBusqueda}
         onAgregar={moviendo ? undefined : onAgregar}
         onEditar={
@@ -1098,22 +1143,6 @@ function seleccionarMejorDestino(nodoMovido, nodosIntersectados) {
         return distanciaA - distanciaB;
       })[0] || null
   );
-}
-
-/* ============================================================
-   CENTRO DE NODO
-============================================================ */
-
-function obtenerCentroNodo(node) {
-  const ancho = node?.measured?.width || node?.width || 260;
-
-  const alto = node?.measured?.height || node?.height || 145;
-
-  return {
-    x: Number(node?.position?.x) + ancho / 2,
-
-    y: Number(node?.position?.y) + alto / 2,
-  };
 }
 
 /* ============================================================

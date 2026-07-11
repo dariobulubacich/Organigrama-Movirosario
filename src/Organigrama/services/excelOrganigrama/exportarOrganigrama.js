@@ -2,32 +2,12 @@ import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
 
 const MARGEN_PDF_MM = 10;
-const ANCHO_MAXIMO_CAPTURA = 16000;
-const ALTO_MAXIMO_CAPTURA = 16000;
+const LADO_MAXIMO_IMAGEN = 12000;
 
 /* ============================================================
    EXPORTAR ORGANIGRAMA A PDF
 ============================================================ */
 
-/**
- * Convierte el contenido completo de React Flow en un PDF.
- *
- * @param {Object} opciones
- * @param {HTMLElement} opciones.elemento
- * Elemento DOM correspondiente a `.react-flow__viewport`.
- *
- * @param {Object} opciones.limites
- * Límites calculados mediante `getNodesBounds(nodes)`.
- *
- * @param {Object} opciones.viewport
- * Viewport calculado mediante `getViewportForBounds(...)`.
- *
- * @param {string} opciones.nombreArchivo
- * Nombre del archivo PDF.
- *
- * @param {string} opciones.titulo
- * Título que aparecerá en la parte superior del PDF.
- */
 export async function exportarOrganigramaPDF({
   elemento,
   limites,
@@ -41,49 +21,31 @@ export async function exportarOrganigramaPDF({
     viewport,
   });
 
-  const anchoCaptura = Math.ceil(limites.width);
-  const altoCaptura = Math.ceil(limites.height);
+  const dimensiones = calcularDimensionesCaptura(limites.width, limites.height);
 
-  validarDimensionesCaptura(anchoCaptura, altoCaptura);
+  validarDimensionesCaptura(dimensiones.anchoCaptura, dimensiones.altoCaptura);
 
   const estilosOriginales = guardarEstilosOriginales(elemento);
 
   try {
     prepararElementoParaCaptura({
       elemento,
-      anchoCaptura,
-      altoCaptura,
+      anchoOriginal: dimensiones.anchoOriginal,
+      altoOriginal: dimensiones.altoOriginal,
       viewport,
     });
 
     await esperarRenderizado();
 
-    const dataUrl = await toPng(elemento, {
-      backgroundColor: "#ffffff",
-
-      width: anchoCaptura,
-
-      height: altoCaptura,
-
-      pixelRatio: calcularPixelRatio(anchoCaptura, altoCaptura),
-
-      cacheBust: true,
-
-      skipFonts: false,
-
-      filter: filtrarElementoCaptura,
-
-      style: {
-        width: `${anchoCaptura}px`,
-        height: `${altoCaptura}px`,
-        transform: crearTransformacion(viewport),
-        transformOrigin: "0 0",
-      },
+    const dataUrl = await generarImagenOrganigrama({
+      elemento,
+      viewport,
+      ...dimensiones,
     });
 
     const configuracion = calcularConfiguracionPDF({
-      anchoImagenPx: anchoCaptura,
-      altoImagenPx: altoCaptura,
+      anchoImagenPx: dimensiones.anchoCaptura,
+      altoImagenPx: dimensiones.altoCaptura,
     });
 
     const pdf = new jsPDF({
@@ -93,22 +55,23 @@ export async function exportarOrganigramaPDF({
       compress: true,
     });
 
-    agregarEncabezadoPDF(pdf, titulo);
-
     agregarImagenMultipagina({
       pdf,
       dataUrl,
-      anchoImagenPx: anchoCaptura,
-      altoImagenPx: altoCaptura,
+      anchoImagenPx: dimensiones.anchoCaptura,
+      altoImagenPx: dimensiones.altoCaptura,
+      titulo,
     });
 
-    pdf.save(normalizarNombrePDF(nombreArchivo));
+    const nombreFinal = normalizarNombrePDF(nombreArchivo);
+
+    pdf.save(nombreFinal);
 
     return {
       ok: true,
-      nombreArchivo: normalizarNombrePDF(nombreArchivo),
-      anchoCaptura,
-      altoCaptura,
+      nombreArchivo: nombreFinal,
+      anchoCaptura: dimensiones.anchoCaptura,
+      altoCaptura: dimensiones.altoCaptura,
     };
   } catch (error) {
     console.error("Error al exportar el organigrama a PDF:", error);
@@ -125,12 +88,6 @@ export async function exportarOrganigramaPDF({
    IMPRIMIR ORGANIGRAMA
 ============================================================ */
 
-/**
- * Abre una ventana preparada para imprimir el organigrama completo.
- *
- * Primero convierte el organigrama en una imagen para evitar que
- * React Flow imprima solamente la parte visible en pantalla.
- */
 export async function imprimirOrganigrama({
   elemento,
   limites,
@@ -143,57 +100,39 @@ export async function imprimirOrganigrama({
     viewport,
   });
 
-  const anchoCaptura = Math.ceil(limites.width);
-  const altoCaptura = Math.ceil(limites.height);
+  const dimensiones = calcularDimensionesCaptura(limites.width, limites.height);
 
-  validarDimensionesCaptura(anchoCaptura, altoCaptura);
+  validarDimensionesCaptura(dimensiones.anchoCaptura, dimensiones.altoCaptura);
 
   const estilosOriginales = guardarEstilosOriginales(elemento);
 
   try {
     prepararElementoParaCaptura({
       elemento,
-      anchoCaptura,
-      altoCaptura,
+      anchoOriginal: dimensiones.anchoOriginal,
+      altoOriginal: dimensiones.altoOriginal,
       viewport,
     });
 
     await esperarRenderizado();
 
-    const dataUrl = await toPng(elemento, {
-      backgroundColor: "#ffffff",
-
-      width: anchoCaptura,
-
-      height: altoCaptura,
-
-      pixelRatio: calcularPixelRatio(anchoCaptura, altoCaptura),
-
-      cacheBust: true,
-
-      skipFonts: false,
-
-      filter: filtrarElementoCaptura,
-
-      style: {
-        width: `${anchoCaptura}px`,
-        height: `${altoCaptura}px`,
-        transform: crearTransformacion(viewport),
-        transformOrigin: "0 0",
-      },
+    const dataUrl = await generarImagenOrganigrama({
+      elemento,
+      viewport,
+      ...dimensiones,
     });
 
     abrirVentanaImpresion({
       dataUrl,
       titulo,
-      anchoCaptura,
-      altoCaptura,
+      anchoCaptura: dimensiones.anchoCaptura,
+      altoCaptura: dimensiones.altoCaptura,
     });
 
     return {
       ok: true,
-      anchoCaptura,
-      altoCaptura,
+      anchoCaptura: dimensiones.anchoCaptura,
+      altoCaptura: dimensiones.altoCaptura,
     };
   } catch (error) {
     console.error("Error al preparar la impresión:", error);
@@ -207,6 +146,71 @@ export async function imprimirOrganigrama({
 }
 
 /* ============================================================
+   GENERAR IMAGEN
+============================================================ */
+
+async function generarImagenOrganigrama({
+  elemento,
+  viewport,
+  anchoOriginal,
+  altoOriginal,
+  anchoCaptura,
+  altoCaptura,
+  escalaCaptura,
+}) {
+  const transformacion = crearTransformacionEscalada(viewport, escalaCaptura);
+
+  return toPng(elemento, {
+    backgroundColor: "#ffffff",
+
+    width: anchoCaptura,
+    height: altoCaptura,
+
+    canvasWidth: anchoCaptura,
+    canvasHeight: altoCaptura,
+
+    pixelRatio: 1,
+
+    cacheBust: true,
+    skipFonts: false,
+
+    filter: filtrarElementoCaptura,
+
+    style: {
+      width: `${anchoOriginal}px`,
+      height: `${altoOriginal}px`,
+      transform: transformacion,
+      transformOrigin: "0 0",
+      background: "#ffffff",
+    },
+  });
+}
+
+/* ============================================================
+   CALCULAR DIMENSIONES
+============================================================ */
+
+function calcularDimensionesCaptura(ancho, alto) {
+  const anchoOriginal = Math.max(1, Math.ceil(Number(ancho)));
+
+  const altoOriginal = Math.max(1, Math.ceil(Number(alto)));
+
+  const escalaCaptura = calcularEscalaCaptura(anchoOriginal, altoOriginal);
+
+  const anchoCaptura = Math.max(1, Math.ceil(anchoOriginal * escalaCaptura));
+
+  const altoCaptura = Math.max(1, Math.ceil(altoOriginal * escalaCaptura));
+
+  return {
+    anchoOriginal,
+    altoOriginal,
+    escalaCaptura,
+    anchoCaptura,
+    altoCaptura,
+  };
+}
+
+/* ============================================================
    AGREGAR IMAGEN AL PDF
 ============================================================ */
 
@@ -215,6 +219,7 @@ function agregarImagenMultipagina({
   dataUrl,
   anchoImagenPx,
   altoImagenPx,
+  titulo,
 }) {
   const anchoPagina = pdf.internal.pageSize.getWidth();
 
@@ -229,13 +234,9 @@ function agregarImagenMultipagina({
 
   const altoImagenEscalada = (altoImagenPx * anchoDisponible) / anchoImagenPx;
 
-  /*
-  |--------------------------------------------------------------------------
-  | Si el organigrama entra en una sola hoja
-  |--------------------------------------------------------------------------
-  */
-
   if (altoImagenEscalada <= altoDisponible) {
+    agregarEncabezadoPDF(pdf, titulo);
+
     pdf.addImage(
       dataUrl,
       "PNG",
@@ -247,27 +248,20 @@ function agregarImagenMultipagina({
       "FAST",
     );
 
+    agregarNumeroPagina(pdf, 1);
+
     return;
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Organigrama en varias páginas
-  |--------------------------------------------------------------------------
-  |
-  | Se coloca la misma imagen desplazada verticalmente.
-  | Cada página muestra una parte distinta.
-  |--------------------------------------------------------------------------
-  */
-
   let desplazamiento = 0;
-  let numeroPagina = 0;
+  let numeroPagina = 1;
 
   while (desplazamiento < altoImagenEscalada) {
-    if (numeroPagina > 0) {
+    if (numeroPagina > 1) {
       pdf.addPage();
-      agregarEncabezadoPDF(pdf, "Organigrama de la empresa");
     }
+
+    agregarEncabezadoPDF(pdf, titulo);
 
     pdf.addImage(
       dataUrl,
@@ -280,9 +274,10 @@ function agregarImagenMultipagina({
       "FAST",
     );
 
-    agregarNumeroPagina(pdf, numeroPagina + 1);
+    agregarNumeroPagina(pdf, numeroPagina);
 
     desplazamiento += altoDisponible;
+
     numeroPagina += 1;
   }
 }
@@ -295,6 +290,7 @@ function agregarEncabezadoPDF(pdf, titulo) {
   const anchoPagina = pdf.internal.pageSize.getWidth();
 
   pdf.setFont("helvetica", "bold");
+
   pdf.setFontSize(13);
 
   pdf.text(
@@ -307,6 +303,7 @@ function agregarEncabezadoPDF(pdf, titulo) {
   );
 
   pdf.setFont("helvetica", "normal");
+
   pdf.setFontSize(8);
 
   pdf.text(formatearFechaActual(), anchoPagina - MARGEN_PDF_MM, 15, {
@@ -324,6 +321,7 @@ function agregarNumeroPagina(pdf, numeroPagina) {
   const altoPagina = pdf.internal.pageSize.getHeight();
 
   pdf.setFont("helvetica", "normal");
+
   pdf.setFontSize(8);
 
   pdf.text(
@@ -337,7 +335,7 @@ function agregarNumeroPagina(pdf, numeroPagina) {
 }
 
 /* ============================================================
-   CONFIGURACIÓN DEL PDF
+   CONFIGURACIÓN PDF
 ============================================================ */
 
 function calcularConfiguracionPDF({ anchoImagenPx, altoImagenPx }) {
@@ -346,29 +344,23 @@ function calcularConfiguracionPDF({ anchoImagenPx, altoImagenPx }) {
   return {
     orientacion: horizontal ? "landscape" : "portrait",
 
-    /*
-    |--------------------------------------------------------------------------
-    | Usamos A3 para organigramas grandes.
-    |--------------------------------------------------------------------------
-    */
-
     formato: "a3",
   };
 }
 
 /* ============================================================
-   PREPARAR ELEMENTO PARA CAPTURA
+   PREPARAR ELEMENTO
 ============================================================ */
 
 function prepararElementoParaCaptura({
   elemento,
-  anchoCaptura,
-  altoCaptura,
+  anchoOriginal,
+  altoOriginal,
   viewport,
 }) {
-  elemento.style.width = `${anchoCaptura}px`;
+  elemento.style.width = `${anchoOriginal}px`;
 
-  elemento.style.height = `${altoCaptura}px`;
+  elemento.style.height = `${altoOriginal}px`;
 
   elemento.style.transform = crearTransformacion(viewport);
 
@@ -378,13 +370,25 @@ function prepararElementoParaCaptura({
 }
 
 /* ============================================================
-   CREAR TRANSFORMACIÓN
+   TRANSFORMACIONES
 ============================================================ */
 
 function crearTransformacion(viewport) {
   const x = Number(viewport?.x) || 0;
+
   const y = Number(viewport?.y) || 0;
+
   const zoom = Number(viewport?.zoom) || 1;
+
+  return `translate(${x}px, ${y}px) scale(${zoom})`;
+}
+
+function crearTransformacionEscalada(viewport, escalaCaptura) {
+  const x = (Number(viewport?.x) || 0) * escalaCaptura;
+
+  const y = (Number(viewport?.y) || 0) * escalaCaptura;
+
+  const zoom = (Number(viewport?.zoom) || 1) * escalaCaptura;
 
   return `translate(${x}px, ${y}px) scale(${zoom})`;
 }
@@ -405,18 +409,22 @@ function guardarEstilosOriginales(elemento) {
 
 function restaurarEstilosOriginales(elemento, estilos) {
   elemento.style.width = estilos.width;
+
   elemento.style.height = estilos.height;
+
   elemento.style.transform = estilos.transform;
+
   elemento.style.transformOrigin = estilos.transformOrigin;
+
   elemento.style.background = estilos.background;
 }
 
 /* ============================================================
-   ABRIR VENTANA DE IMPRESIÓN
+   VENTANA DE IMPRESIÓN
 ============================================================ */
 
 function abrirVentanaImpresion({ dataUrl, titulo, anchoCaptura, altoCaptura }) {
-  const ventana = window.open("", "_blank", "noopener,noreferrer");
+  const ventana = window.open("", "_blank");
 
   if (!ventana) {
     throw new Error(
@@ -434,9 +442,9 @@ function abrirVentanaImpresion({ dataUrl, titulo, anchoCaptura, altoCaptura }) {
       <head>
         <meta charset="UTF-8" />
 
-        <title>${escaparHtml(
-          limpiarTexto(titulo) || "Organigrama de la empresa",
-        )}</title>
+        <title>
+          ${escaparHtml(limpiarTexto(titulo) || "Organigrama de la empresa")}
+        </title>
 
         <style>
           @page {
@@ -450,26 +458,30 @@ function abrirVentanaImpresion({ dataUrl, titulo, anchoCaptura, altoCaptura }) {
 
           html,
           body {
+            width: 100%;
             margin: 0;
             padding: 0;
             background: #ffffff;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family:
+              Arial,
+              Helvetica,
+              sans-serif;
           }
 
           .encabezado {
-            margin-bottom: 10mm;
+            margin-bottom: 8mm;
             text-align: center;
           }
 
           .encabezado h1 {
-            margin: 0 0 4mm;
+            margin: 0 0 3mm;
             font-size: 18px;
           }
 
           .encabezado p {
             margin: 0;
             color: #555555;
-            font-size: 11px;
+            font-size: 10px;
           }
 
           .organigrama {
@@ -485,8 +497,15 @@ function abrirVentanaImpresion({ dataUrl, titulo, anchoCaptura, altoCaptura }) {
           }
 
           @media print {
+            html,
+            body {
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+
             .organigrama img {
-              max-width: 100%;
+              width: 100%;
+              max-width: none;
             }
           }
         </style>
@@ -498,7 +517,9 @@ function abrirVentanaImpresion({ dataUrl, titulo, anchoCaptura, altoCaptura }) {
             ${escaparHtml(limpiarTexto(titulo) || "Organigrama de la empresa")}
           </h1>
 
-          <p>${formatearFechaActual()}</p>
+          <p>
+            ${formatearFechaActual()}
+          </p>
         </header>
 
         <main class="organigrama">
@@ -524,7 +545,7 @@ function abrirVentanaImpresion({ dataUrl, titulo, anchoCaptura, altoCaptura }) {
                 function () {
                   window.print();
                 },
-                300
+                400
               );
             }
           );
@@ -541,7 +562,7 @@ function abrirVentanaImpresion({ dataUrl, titulo, anchoCaptura, altoCaptura }) {
 ============================================================ */
 
 function filtrarElementoCaptura(nodo) {
-  if (!(nodo instanceof HTMLElement)) {
+  if (typeof HTMLElement === "undefined" || !(nodo instanceof HTMLElement)) {
     return true;
   }
 
@@ -554,29 +575,15 @@ function filtrarElementoCaptura(nodo) {
 }
 
 /* ============================================================
-   PIXEL RATIO
-============================================================ */
-
-function calcularPixelRatio(ancho, alto) {
-  const pixeles = ancho * alto;
-
-  if (pixeles > 40000000) {
-    return 1;
-  }
-
-  if (pixeles > 18000000) {
-    return 1.5;
-  }
-
-  return 2;
-}
-
-/* ============================================================
    VALIDACIONES
 ============================================================ */
 
 function validarDatosExportacion({ elemento, limites, viewport }) {
-  if (!elemento || !(elemento instanceof HTMLElement)) {
+  if (
+    typeof HTMLElement === "undefined" ||
+    !elemento ||
+    !(elemento instanceof HTMLElement)
+  ) {
     throw new Error("No se encontró el contenido del organigrama.");
   }
 
@@ -596,11 +603,22 @@ function validarDatosExportacion({ elemento, limites, viewport }) {
 }
 
 function validarDimensionesCaptura(ancho, alto) {
-  if (ancho > ANCHO_MAXIMO_CAPTURA || alto > ALTO_MAXIMO_CAPTURA) {
-    throw new Error(
-      "El organigrama es demasiado grande para exportarlo en una sola imagen.",
-    );
+  if (
+    !Number.isFinite(ancho) ||
+    !Number.isFinite(alto) ||
+    ancho <= 0 ||
+    alto <= 0
+  ) {
+    throw new Error("Las dimensiones del organigrama no son válidas.");
   }
+}
+
+function calcularEscalaCaptura(ancho, alto) {
+  const escalaAncho = LADO_MAXIMO_IMAGEN / ancho;
+
+  const escalaAlto = LADO_MAXIMO_IMAGEN / alto;
+
+  return Math.min(1, escalaAncho, escalaAlto);
 }
 
 /* ============================================================
