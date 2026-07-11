@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 import ImportarExcel from "../organigrama/components/ImportarExcel";
-import VistaOrganigrama from "../organigrama/components/VistaOrganigrama";
+import VistaOrganigrama from "../components/VistaOrganigrama";
 import FormEmpleado from "../organigrama/components/FormEmpleado";
 
 import {
