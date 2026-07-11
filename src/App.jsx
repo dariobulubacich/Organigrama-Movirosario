@@ -1,4 +1,4 @@
-import Organigrama from "../src/organigrama/Organigrama";
+import Organigrama from "./Organigrama/Organigrama";
 
 import "./App.css";
 
