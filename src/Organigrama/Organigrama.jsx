@@ -12,7 +12,7 @@ import {
   desactivarEmpleado,
 } from "../organigrama/services/organigramaService";
 
-import "./Organigrama.css";
+import "./organigrama.css";
 
 export default function Organigrama() {
   const [mostrarImportador, setMostrarImportador] = useState(false);
