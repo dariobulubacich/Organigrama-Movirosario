@@ -4,6 +4,7 @@ import {
   Background,
   Controls,
   getNodesBounds,
+  getSmoothStepPath,
   getViewportForBounds,
   MiniMap,
   ReactFlow,
@@ -40,7 +41,45 @@ import "./VistaOrganigrama.css";
 const nodeTypes = {
   empleado: NodoEmpleado,
 };
+function ConexionArea({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  data,
+}) {
+  const [edgePath] = getSmoothStepPath({
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    borderRadius: 12,
+  });
 
+  const colorArea = data?.colorArea || "#64748b";
+
+  return (
+    <path
+      id={id}
+      d={edgePath}
+      className="linea-organigrama-por-area"
+      fill="none"
+      stroke={colorArea}
+      strokeWidth={data?.esConexionDesdeDirector ? 5 : 4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  );
+}
+
+const edgeTypes = {
+  conexionArea: ConexionArea,
+};
 const ZOOM_MINIMO = 0.08;
 const ZOOM_MAXIMO = 2;
 
@@ -294,7 +333,7 @@ function OrganigramaInterno({
 
   const handleSeleccionarNodo = useCallback(
     (_event, node) => {
-      if (arrastrandoRef.current) {
+      if (node?.data?.esTituloArea === true || !node?.data?.empleado) {
         return;
       }
 
@@ -542,16 +581,22 @@ function OrganigramaInterno({
         return;
       }
 
-      arrastrandoRef.current = true;
+      /*
+    |--------------------------------------------------------------------------
+    | No iniciar movimientos sobre títulos de área.
+    |--------------------------------------------------------------------------
+    */
 
-      const empleado = node?.data?.empleado;
-
-      if (!empleado) {
+      if (node?.data?.esTituloArea === true || !node?.data?.empleado) {
+        arrastrandoRef.current = false;
         return;
       }
 
-      setEmpleadoSeleccionado(empleado);
+      arrastrandoRef.current = true;
 
+      const empleado = node.data.empleado;
+
+      setEmpleadoSeleccionado(empleado);
       setIdEmpleadoSeleccionado(empleado.idEmpleado);
 
       setMensajeSalida({
@@ -569,8 +614,22 @@ function OrganigramaInterno({
         return;
       }
 
+      /*
+    |--------------------------------------------------------------------------
+    | Ignorar títulos y cualquier nodo que no sea un empleado.
+    |--------------------------------------------------------------------------
+    */
+
+      if (node?.data?.esTituloArea === true || !node?.data?.empleado) {
+        setIdSupervisorDestino(null);
+        return;
+      }
+
       const intersectados = getIntersectingNodes(node, true).filter(
-        (item) => item.id !== node.id,
+        (item) =>
+          item.id !== node.id &&
+          item?.data?.esTituloArea !== true &&
+          Boolean(item?.data?.empleado),
       );
 
       const destino = seleccionarMejorDestino(node, intersectados);
@@ -627,7 +686,10 @@ function OrganigramaInterno({
       window.setTimeout(() => {
         arrastrandoRef.current = false;
       }, 100);
-
+      if (node?.data?.esTituloArea === true || !node?.data?.empleado) {
+        setIdSupervisorDestino(null);
+        return;
+      }
       if (moviendo) {
         return;
       }
@@ -1029,6 +1091,7 @@ function OrganigramaInterno({
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onNodeClick={handleSeleccionarNodo}
           onPaneClick={handleDeseleccionar}

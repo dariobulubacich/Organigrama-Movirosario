@@ -91,23 +91,8 @@
 }
 
 /* ============================================================
-   CONEXIONES
+   CONEXIONES CON COLOR POR ÁREA
 ============================================================ */
-
-.vista-organigrama .react-flow__edge-path {
-  stroke: #64748b;
-  stroke-width: 2;
-}
-
-.vista-organigrama .react-flow__edge.selected .react-flow__edge-path {
-  stroke: #2563eb;
-  stroke-width: 3;
-}
-
-.vista-organigrama .react-flow__connection-path {
-  stroke: #2563eb;
-  stroke-width: 2;
-}
 
 /* ============================================================
    CONTROLES DE ZOOM
@@ -158,11 +143,6 @@
 
 .vista-organigrama .react-flow__minimap-mask {
   fill: rgba(37, 99, 235, 0.12);
-}
-
-.vista-organigrama .react-flow__minimap-node {
-  fill: #64748b;
-  stroke: none;
 }
 
 /* ============================================================
@@ -352,6 +332,15 @@
 .nodo-empleado__expandir--abierto {
   background: #dc2626;
 }
+/* ============================================================
+   COLOR DEFINITIVO DE LAS LÍNEAS POR ÁREA
+============================================================ */
+
+.vista-organigrama .react-flow__edges path.linea-organigrama-por-area {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 @keyframes vista-organigrama-girar {
   to {
     transform: rotate(360deg);
@@ -435,10 +424,5 @@
   .vista-organigrama .react-flow__pane,
   .vista-organigrama .react-flow__viewport {
     overflow: visible;
-  }
-
-  .vista-organigrama .react-flow__edge-path {
-    stroke: #475569;
-    stroke-width: 1.5;
   }
 }
