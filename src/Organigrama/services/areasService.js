@@ -9,7 +9,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 
-import { db } from "../firebase";
+import { db } from "../../../firebase";
 
 const ESTRUCTURA_PREDETERMINADA = [
   {
