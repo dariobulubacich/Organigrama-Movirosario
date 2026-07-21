@@ -388,41 +388,22 @@ export default function construirOrganigramaFlow(empleados, opciones = {}) {
         ),
       );
       function obtenerColorPorNombreArea(nombreArea) {
-        if (nombreAreaSeleccionada && nombreArea === nombreAreaSeleccionada) {
-          const primerColor = coloresPorResponsable.values().next().value;
-
-          return primerColor || COLORES_AREAS[0];
-        }
+        const primerColor = coloresPorResponsable.values().next().value;
 
         const responsable = responsablesArea.find(
           (empleado) => obtenerNombreRama(empleado) === nombreArea,
         );
 
         if (!responsable) {
-          return COLORES_AREAS[0];
+          return primerColor || COLORES_AREAS[0];
         }
 
         return (
           coloresPorResponsable.get(String(responsable.idEmpleado)) ||
+          primerColor ||
           COLORES_AREAS[0]
         );
       }
-
-      bloquesAreas.forEach((bloque) => {
-        const centroBloque = posicionXActual + bloque.ancho / 2;
-
-        nodosTitulosAreas.push(
-          crearNodoTituloArea(
-            bloque.nombreArea,
-            centroBloque,
-            obtenerColorPorNombreArea(bloque.nombreArea),
-          ),
-        );
-
-        posicionarBloqueArea(bloque, posicionXActual, posiciones);
-
-        posicionXActual += bloque.ancho + SEPARACION_ENTRE_AREAS;
-      });
       /*
   |--------------------------------------------------------------------------
   | Posicionar los empleados del área.
