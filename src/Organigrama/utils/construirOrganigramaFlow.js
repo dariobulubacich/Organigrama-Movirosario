@@ -28,8 +28,7 @@ const COLORES_AREAS = [
   "#4f46e5",
   "#16a34a",
 ];
-const NOMBRES_OCULTOS = new Set([
-  "",
+const NOMBRES_VACANTES = new Set([
   "vacante",
   "puesto vacante",
   "sin cubrir",
@@ -1109,7 +1108,28 @@ function aplicarDistribucionDagre(nodes, edges) {
 /* ============================================================
    NORMALIZAR EMPLEADO
 ============================================================ */
+function obtenerNombreVisibleEmpleado(empleado) {
+  const nombreOriginal = limpiarTexto(empleado?.nombre);
 
+  const nombreNormalizado = normalizarTexto(nombreOriginal);
+
+  const cargoNormalizado = normalizarTexto(
+    empleado?.cargo || empleado?.puesto || empleado?.puestoAreaId,
+  );
+
+  const esGerencia =
+    cargoNormalizado.includes("gerente") ||
+    cargoNormalizado.includes("gerencia");
+
+  const esVacante =
+    !nombreNormalizado || NOMBRES_VACANTES.has(nombreNormalizado);
+
+  if (esGerencia && esVacante) {
+    return "Vacante";
+  }
+
+  return nombreOriginal;
+}
 function normalizarEmpleado(empleado) {
   const idEmpleado = convertirIdentificador(
     empleado?.idEmpleado ?? empleado?.id,
@@ -1123,7 +1143,7 @@ function normalizarEmpleado(empleado) {
     idEmpleado,
     supervisorId,
 
-    nombre: limpiarTexto(empleado?.nombre),
+    nombre: obtenerNombreVisibleEmpleado(empleado),
 
     cargo: limpiarTexto(empleado?.cargo || empleado?.puesto),
 
@@ -1164,11 +1184,38 @@ function debeMostrarEmpleado(empleado) {
 
   const nombreNormalizado = normalizarTexto(empleado.nombre);
 
-  if (!nombreNormalizado) {
+  const cargoNormalizado = normalizarTexto(
+    empleado.cargo || empleado.puesto || empleado.puestoAreaId,
+  );
+
+  const esGerencia =
+    cargoNormalizado.includes("gerente") ||
+    cargoNormalizado.includes("gerencia");
+
+  const esVacante =
+    !nombreNormalizado || NOMBRES_VACANTES.has(nombreNormalizado);
+
+  if (esVacante) {
+    return esGerencia;
+  }
+
+  const nombreEsIgualAlCargo =
+    nombreNormalizado &&
+    cargoNormalizado &&
+    nombreNormalizado === cargoNormalizado;
+
+  if (nombreEsIgualAlCargo) {
     return false;
   }
 
-  if (NOMBRES_OCULTOS.has(nombreNormalizado)) {
+  const nombrePareceCargo =
+    nombreNormalizado.startsWith("gerente ") ||
+    nombreNormalizado.startsWith("jefe ") ||
+    nombreNormalizado.startsWith("supervisor ") ||
+    nombreNormalizado.startsWith("controller ") ||
+    nombreNormalizado.startsWith("coordinador ");
+
+  if (nombrePareceCargo && !cargoNormalizado) {
     return false;
   }
 
