@@ -35,6 +35,11 @@ import {
   exportarOrganigramaPDF,
   imprimirOrganigrama,
 } from "../services/excelOrganigrama/exportarOrganigrama";
+import {
+  crearArea,
+  modificarNombreArea,
+  obtenerAreas,
+} from "../services/areasService";
 
 import "./VistaOrganigrama.css";
 
@@ -92,6 +97,125 @@ function OrganigramaInterno({
 }) {
   const contenedorFlowRef = useRef(null);
   const arrastrandoRef = useRef(false);
+  const [areas, setAreas] = useState([]);
+  const [areaSeleccionadaId, setAreaSeleccionadaId] = useState("");
+  const [nuevoNombreArea, setNuevoNombreArea] = useState("");
+  const [editandoArea, setEditandoArea] = useState(false);
+  const [guardandoArea, setGuardandoArea] = useState(false);
+  const [errorAreas, setErrorAreas] = useState("");
+  /* ============================================================
+   CARGAR ÁREAS
+============================================================ */
+
+  const cargarAreas = useCallback(async () => {
+    try {
+      setErrorAreas("");
+
+      const resultadoAreas = await obtenerAreas();
+
+      setAreas(Array.isArray(resultadoAreas) ? resultadoAreas : []);
+    } catch (error) {
+      console.error("Error al obtener áreas:", error);
+
+      setAreas([]);
+
+      setErrorAreas(error?.message || "No se pudieron cargar las áreas.");
+    }
+  }, []);
+
+  useEffect(() => {
+    cargarAreas();
+  }, [cargarAreas]);
+
+  /* ============================================================
+   CREAR ÁREA
+============================================================ */
+
+  const handleCrearArea = useCallback(async () => {
+    const nombre = String(nuevoNombreArea || "").trim();
+
+    if (!nombre) {
+      setErrorAreas("Ingresá el nombre del área.");
+      return;
+    }
+
+    const yaExiste = areas.some(
+      (area) => normalizarTexto(area.nombre) === normalizarTexto(nombre),
+    );
+
+    if (yaExiste) {
+      setErrorAreas(`Ya existe un área llamada "${nombre}".`);
+      return;
+    }
+
+    setGuardandoArea(true);
+    setErrorAreas("");
+
+    try {
+      const nuevaArea = await crearArea(nombre);
+
+      await cargarAreas();
+
+      setAreaSeleccionadaId(String(nuevaArea.id));
+      setNuevoNombreArea(nuevaArea.nombre || nombre);
+      setEditandoArea(false);
+      setIdsExpandidos(new Set());
+      setEmpleadoSeleccionado(null);
+      setIdEmpleadoSeleccionado(null);
+    } catch (error) {
+      console.error("Error al crear el área:", error);
+
+      setErrorAreas(error?.message || "No se pudo crear el área.");
+    } finally {
+      setGuardandoArea(false);
+    }
+  }, [nuevoNombreArea, areas, cargarAreas]);
+
+  /* ============================================================
+   MODIFICAR ÁREA
+============================================================ */
+
+  const handleModificarArea = useCallback(async () => {
+    const nombre = String(nuevoNombreArea || "").trim();
+
+    if (!areaSeleccionadaId) {
+      setErrorAreas("Seleccioná un área.");
+      return;
+    }
+
+    if (!nombre) {
+      setErrorAreas("Ingresá el nuevo nombre del área.");
+      return;
+    }
+
+    const nombreRepetido = areas.some(
+      (area) =>
+        String(area.id) !== String(areaSeleccionadaId) &&
+        normalizarTexto(area.nombre) === normalizarTexto(nombre),
+    );
+
+    if (nombreRepetido) {
+      setErrorAreas(`Ya existe un área llamada "${nombre}".`);
+      return;
+    }
+
+    setGuardandoArea(true);
+    setErrorAreas("");
+
+    try {
+      await modificarNombreArea(areaSeleccionadaId, nombre);
+
+      await cargarAreas();
+
+      setEditandoArea(false);
+    } catch (error) {
+      console.error("Error al modificar el área:", error);
+
+      setErrorAreas(error?.message || "No se pudo modificar el área.");
+    } finally {
+      setGuardandoArea(false);
+    }
+  }, [areaSeleccionadaId, nuevoNombreArea, areas, cargarAreas]);
 
   const { fitView, setCenter, zoomIn, zoomOut, getZoom, getIntersectingNodes } =
     useReactFlow();
@@ -209,41 +333,97 @@ function OrganigramaInterno({
   }, [empleados]);
 
   /* ============================================================
-     IDENTIFICAR EMPLEADOS CON HIJOS
-  ============================================================ */
-
-  const idsConHijos = useMemo(() => {
-    return obtenerIdsConHijos(empleadosActivos);
-  }, [empleadosActivos]);
-
-  /* ============================================================
      FILTRAR RAMAS VISIBLES
   ============================================================ */
 
-  const empleadosVisibles = useMemo(() => {
-    if (mostrarTodoParaSalida) {
+  const empleadosDelArea = useMemo(() => {
+    if (!areaSeleccionadaId) {
       return empleadosActivos;
     }
 
-    return filtrarRamasVisibles(empleadosActivos, idsExpandidos);
-  }, [empleadosActivos, idsExpandidos, mostrarTodoParaSalida]);
+    return empleadosActivos.filter(
+      (empleado) =>
+        String(empleado.areaId || "") === String(areaSeleccionadaId),
+    );
+  }, [empleadosActivos, areaSeleccionadaId]);
+  const areaSeleccionada = useMemo(() => {
+    if (!areaSeleccionadaId) {
+      return null;
+    }
+
+    return (
+      areas.find((area) => String(area.id) === String(areaSeleccionadaId)) ||
+      null
+    );
+  }, [areas, areaSeleccionadaId]);
 
   /* ============================================================
      CONSTRUIR VISTA ACTUAL
   ============================================================ */
 
-  const resultado = useMemo(() => {
-    return construirOrganigramaFlow(empleadosVisibles);
-  }, [empleadosVisibles]);
+  /* ============================================================
+   EMPLEADOS COMPLETOS DEL ÁREA
+============================================================ */
+
+  const empleadosPreparadosCompletos = useMemo(() => {
+    if (!areaSeleccionadaId) {
+      return empleadosDelArea;
+    }
+
+    const idsDelArea = new Set(
+      empleadosDelArea.map((empleado) => String(empleado.idEmpleado)),
+    );
+
+    return empleadosDelArea.map((empleado) => {
+      const supervisorEstaEnArea =
+        empleado.supervisorId !== null &&
+        empleado.supervisorId !== undefined &&
+        idsDelArea.has(String(empleado.supervisorId));
+
+      return {
+        ...empleado,
+        supervisorId: supervisorEstaEnArea ? empleado.supervisorId : null,
+      };
+    });
+  }, [empleadosDelArea, areaSeleccionadaId]);
+
+  const idsConHijos = useMemo(() => {
+    return obtenerIdsConHijos(empleadosPreparadosCompletos);
+  }, [empleadosPreparadosCompletos]);
 
   /* ============================================================
-     CONSTRUIR ORGANIGRAMA COMPLETO PARA IMPRESIÓN
-  ============================================================ */
+   EMPLEADOS VISIBLES SEGÚN RAMAS ABIERTAS
+============================================================ */
+
+  const empleadosVisibles = useMemo(() => {
+    if (mostrarTodoParaSalida) {
+      return empleadosPreparadosCompletos;
+    }
+
+    return filtrarRamasVisibles(empleadosPreparadosCompletos, idsExpandidos);
+  }, [empleadosPreparadosCompletos, idsExpandidos, mostrarTodoParaSalida]);
+
+  /* ============================================================
+   ORGANIGRAMA VISIBLE
+============================================================ */
+
+  const resultado = useMemo(() => {
+    return construirOrganigramaFlow(empleadosVisibles, {
+      areaId: areaSeleccionadaId,
+      nombreArea: areaSeleccionada?.nombre || "",
+    });
+  }, [empleadosVisibles, areaSeleccionadaId, areaSeleccionada]);
+
+  /* ============================================================
+   ORGANIGRAMA COMPLETO PARA IMPRESIÓN
+============================================================ */
 
   const resultadoCompleto = useMemo(() => {
-    return construirOrganigramaFlow(empleadosActivos);
-  }, [empleadosActivos]);
-
+    return construirOrganigramaFlow(empleadosPreparadosCompletos, {
+      areaId: areaSeleccionadaId,
+      nombreArea: areaSeleccionada?.nombre || "",
+    });
+  }, [empleadosPreparadosCompletos, areaSeleccionadaId, areaSeleccionada]);
   /* ============================================================
      ABRIR / CERRAR RAMA
   ============================================================ */
@@ -401,13 +581,19 @@ function OrganigramaInterno({
         |--------------------------------------------------------------------------
         */
 
-        const coincidencia = empleadosActivos.find((empleado) => {
+        const empleadosParaBuscar = areaSeleccionadaId
+          ? empleadosDelArea
+          : empleadosActivos;
+
+        const coincidencia = empleadosParaBuscar.find((empleado) => {
           const valores = [
             empleado.idEmpleado,
             empleado.nombre,
             empleado.cargo,
             empleado.puesto,
             empleado.area,
+            empleado.areaId,
+            empleado.puestoAreaId,
             empleado.email,
             empleado.interno,
           ];
@@ -433,9 +619,13 @@ function OrganigramaInterno({
         |--------------------------------------------------------------------------
         */
 
+        const empleadosBaseCadena = areaSeleccionadaId
+          ? empleadosPreparadosCompletos
+          : empleadosActivos;
+
         const idsNecesarios = obtenerCadenaSupervisores(
           coincidencia,
-          empleadosActivos,
+          empleadosBaseCadena,
         );
 
         setIdsExpandidos((anteriores) => {
@@ -458,11 +648,17 @@ function OrganigramaInterno({
 
         await esperarRenderizadoCompleto();
 
+        const empleadosBaseBusqueda = areaSeleccionadaId
+          ? empleadosPreparadosCompletos
+          : empleadosActivos;
+
+        const empleadosBusquedaVisibles = filtrarRamasVisibles(
+          empleadosBaseBusqueda,
+          new Set([...idsExpandidos, ...idsNecesarios.map(String)]),
+        );
+
         const nodoEncontrado = construirOrganigramaFlow(
-          filtrarRamasVisibles(
-            empleadosActivos,
-            new Set([...idsExpandidos, ...idsNecesarios.map(String)]),
-          ),
+          empleadosBusquedaVisibles,
         ).nodes.find((node) => node.id === String(coincidencia.idEmpleado));
 
         if (nodoEncontrado) {
@@ -472,7 +668,14 @@ function OrganigramaInterno({
         setBuscando(false);
       }
     },
-    [empleadosActivos, idsExpandidos],
+    [
+      empleadosActivos,
+      empleadosDelArea,
+      empleadosPreparadosCompletos,
+      areaSeleccionadaId,
+      idsExpandidos,
+      centrarEnNodo,
+    ],
   );
 
   /* ============================================================
@@ -488,9 +691,13 @@ function OrganigramaInterno({
       setMensajeBusqueda("");
       setMensajeSalida(null);
 
+      const empleadosBaseCadena = areaSeleccionadaId
+        ? empleadosPreparadosCompletos
+        : empleadosActivos;
+
       const idsNecesarios = obtenerCadenaSupervisores(
-        empleado,
-        empleadosActivos,
+        coincidencia,
+        empleadosBaseCadena,
       );
 
       const nuevosIdsExpandidos = new Set(idsExpandidos);
@@ -1086,6 +1293,108 @@ function OrganigramaInterno({
             </ul>
           </div>
         )}
+        <div className="administracion-areas">
+          <select
+            value={areaSeleccionadaId}
+            disabled={guardandoArea || moviendo}
+            onChange={(event) => {
+              const areaId = event.target.value;
+
+              const areaEncontrada = areas.find(
+                (area) => String(area.id) === String(areaId),
+              );
+
+              setAreaSeleccionadaId(areaId);
+              setNuevoNombreArea(areaEncontrada?.nombre || "");
+
+              setEditandoArea(false);
+              setErrorAreas("");
+              setIdsExpandidos(new Set());
+              setEmpleadoSeleccionado(null);
+              setIdEmpleadoSeleccionado(null);
+              setMensajeBusqueda("");
+              setMensajeSalida(null);
+            }}
+          >
+            <option value="">Todas las áreas</option>
+
+            {areas.map((area) => (
+              <option key={area.id} value={area.id}>
+                {area.nombre}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="text"
+            value={nuevoNombreArea}
+            disabled={guardandoArea || moviendo}
+            onChange={(event) => setNuevoNombreArea(event.target.value)}
+            placeholder={
+              editandoArea ? "Nuevo nombre del área" : "Nombre de la nueva área"
+            }
+          />
+
+          {!editandoArea ? (
+            <>
+              <button
+                type="button"
+                disabled={guardandoArea || moviendo || !nuevoNombreArea.trim()}
+                onClick={handleCrearArea}
+              >
+                {guardandoArea ? "Guardando..." : "Crear área"}
+              </button>
+
+              <button
+                type="button"
+                disabled={!areaSeleccionadaId || guardandoArea || moviendo}
+                onClick={() => {
+                  const areaActual = areas.find(
+                    (area) => String(area.id) === String(areaSeleccionadaId),
+                  );
+
+                  setNuevoNombreArea(areaActual?.nombre || "");
+
+                  setEditandoArea(true);
+                  setErrorAreas("");
+                }}
+              >
+                Modificar nombre
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                disabled={guardandoArea || !nuevoNombreArea.trim()}
+                onClick={handleModificarArea}
+              >
+                {guardandoArea ? "Guardando..." : "Guardar nombre"}
+              </button>
+
+              <button
+                type="button"
+                disabled={guardandoArea}
+                onClick={() => {
+                  const areaActual = areas.find(
+                    (area) => String(area.id) === String(areaSeleccionadaId),
+                  );
+
+                  setNuevoNombreArea(areaActual?.nombre || "");
+
+                  setEditandoArea(false);
+                  setErrorAreas("");
+                }}
+              >
+                Cancelar
+              </button>
+            </>
+          )}
+
+          {errorAreas && (
+            <div className="administracion-areas__error">{errorAreas}</div>
+          )}
+        </div>
 
         <ReactFlow
           nodes={nodes}

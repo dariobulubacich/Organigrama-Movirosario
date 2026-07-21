@@ -62,10 +62,12 @@ const NOMBRES_OCULTOS = new Set([
  *   errores: []
  * }
  */
-export default function construirOrganigramaFlow(empleados) {
+export default function construirOrganigramaFlow(empleados, opciones = {}) {
   if (!Array.isArray(empleados) || empleados.length === 0) {
     return crearResultadoVacio();
   }
+
+  const areaSeleccionadaId = limpiarTexto(opciones?.areaId);
 
   const errores = [];
 
@@ -248,7 +250,8 @@ export default function construirOrganigramaFlow(empleados) {
 
       const responsableId = responsableArea?.idEmpleado ?? null;
 
-      const nombreArea = obtenerNombreRama(responsableArea);
+      const nombreArea =
+        nombreAreaSeleccionada || obtenerNombreRama(responsableArea);
 
       const colorArea =
         coloresPorResponsable.get(String(responsableId)) || "#64748b";
@@ -386,18 +389,41 @@ export default function construirOrganigramaFlow(empleados) {
         ),
       );
       function obtenerColorPorNombreArea(nombreArea) {
+        if (nombreAreaSeleccionada && nombreArea === nombreAreaSeleccionada) {
+          const primerColor = coloresPorResponsable.values().next().value;
+
+          return primerColor || COLORES_AREAS[0];
+        }
+
         const responsable = responsablesArea.find(
           (empleado) => obtenerNombreRama(empleado) === nombreArea,
         );
 
         if (!responsable) {
-          return "#64748b";
+          return COLORES_AREAS[0];
         }
 
         return (
-          coloresPorResponsable.get(String(responsable.idEmpleado)) || "#64748b"
+          coloresPorResponsable.get(String(responsable.idEmpleado)) ||
+          COLORES_AREAS[0]
         );
       }
+
+      bloquesAreas.forEach((bloque) => {
+        const centroBloque = posicionXActual + bloque.ancho / 2;
+
+        nodosTitulosAreas.push(
+          crearNodoTituloArea(
+            bloque.nombreArea,
+            centroBloque,
+            obtenerColorPorNombreArea(bloque.nombreArea),
+          ),
+        );
+
+        posicionarBloqueArea(bloque, posicionXActual, posiciones);
+
+        posicionXActual += bloque.ancho + SEPARACION_ENTRE_AREAS;
+      });
       /*
   |--------------------------------------------------------------------------
   | Posicionar los empleados del área.
@@ -711,9 +737,6 @@ export default function construirOrganigramaFlow(empleados) {
         return;
       }
 
-      /*
-       * El director no pertenece a ningún bloque de área.
-       */
       if (
         directorId !== null &&
         String(empleado.idEmpleado) === String(directorId)
@@ -727,7 +750,8 @@ export default function construirOrganigramaFlow(empleados) {
         directorId,
       );
 
-      const nombreArea = obtenerNombreRama(responsableArea);
+      const nombreArea =
+        nombreAreaSeleccionada || obtenerNombreRama(responsableArea);
 
       if (!grupos.has(nombreArea)) {
         grupos.set(nombreArea, []);
@@ -1116,7 +1140,6 @@ function normalizarEmpleado(empleado) {
     ...empleado,
 
     idEmpleado,
-
     supervisorId,
 
     nombre: limpiarTexto(empleado?.nombre),
@@ -1124,6 +1147,10 @@ function normalizarEmpleado(empleado) {
     cargo: limpiarTexto(empleado?.cargo || empleado?.puesto),
 
     puesto: limpiarTexto(empleado?.puesto || empleado?.cargo),
+
+    areaId: limpiarTexto(empleado?.areaId),
+
+    puestoAreaId: limpiarTexto(empleado?.puestoAreaId),
 
     area: limpiarTexto(
       empleado?.departamento ||
@@ -1135,19 +1162,13 @@ function normalizarEmpleado(empleado) {
     ),
 
     telefono: limpiarTexto(empleado?.telefono),
-
     interno: limpiarTexto(empleado?.interno),
-
     email: limpiarTexto(empleado?.email),
-
     foto: limpiarTexto(empleado?.foto),
-
     color: limpiarTexto(empleado?.color),
 
     nivel: empleado?.nivel ?? "",
-
     orden: convertirOrden(empleado?.orden),
-
     activo: empleado?.activo !== false,
   };
 }
