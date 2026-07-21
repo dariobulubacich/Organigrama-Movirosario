@@ -67,8 +67,6 @@ export default function construirOrganigramaFlow(empleados, opciones = {}) {
     return crearResultadoVacio();
   }
 
-  const areaSeleccionadaId = limpiarTexto(opciones?.areaId);
-
   const errores = [];
 
   const empleadosActivos = empleados
@@ -251,7 +249,8 @@ export default function construirOrganigramaFlow(empleados, opciones = {}) {
       const responsableId = responsableArea?.idEmpleado ?? null;
 
       const nombreArea =
-        nombreAreaSeleccionada || obtenerNombreRama(responsableArea);
+        limpiarTexto(opciones?.nombreArea) ||
+        obtenerNombreRama(responsableArea);
 
       const colorArea =
         coloresPorResponsable.get(String(responsableId)) || "#64748b";
@@ -751,7 +750,8 @@ export default function construirOrganigramaFlow(empleados, opciones = {}) {
       );
 
       const nombreArea =
-        nombreAreaSeleccionada || obtenerNombreRama(responsableArea);
+        limpiarTexto(opciones?.nombreArea) ||
+        obtenerNombreRama(responsableArea);
 
       if (!grupos.has(nombreArea)) {
         grupos.set(nombreArea, []);
