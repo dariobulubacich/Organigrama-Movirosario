@@ -284,16 +284,12 @@ export default function construirOrganigramaFlow(empleados) {
      DISTRIBUCIÓN PIRAMIDAL
   ============================================================ */
 
-  const distribucion = aplicarDistribucionPorAreas(
-    nodes,
-    edges,
-    coloresPorArea,
-  );
+  const distribucion = aplicarDistribucionPorAreas(nodes, edges);
   /* ============================================================
    DISTRIBUCIÓN POR ÁREAS
 ============================================================ */
 
-  function aplicarDistribucionPorAreas(nodes, edges, coloresPorArea) {
+  function aplicarDistribucionPorAreas(nodes, edges) {
     if (!Array.isArray(nodes) || nodes.length === 0) {
       return {
         nodes: [],
