@@ -20,7 +20,7 @@ import NodoEstructural from "../organigrama/components/NodoEstructural";
 import {
   guardarOrganigramaEstructural,
   obtenerOrganigramaEstructural,
-} from "../organigrama/services/organigramaEstructuralService";
+} from "./services/organigramaEstructuralService";
 
 import "./OrganigramaEstructural.css";
 
