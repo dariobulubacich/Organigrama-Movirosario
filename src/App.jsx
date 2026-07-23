@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Organigrama from "./Organigrama/Organigrama";
 import OrganigramaEstructural from "./pages/OrganigramaEstructural";
-
 import "./App.css";
 
 export default function App() {
