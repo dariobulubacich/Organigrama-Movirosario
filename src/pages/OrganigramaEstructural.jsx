@@ -15,12 +15,12 @@ import {
 
 import "@xyflow/react/dist/style.css";
 
-import NodoEstructural from "../components/NodoEstructural";
+import NodoEstructural from "../organigrama/components/NodoEstructural";
 
 import {
   guardarOrganigramaEstructural,
   obtenerOrganigramaEstructural,
-} from "../services/organigramaEstructuralService";
+} from "../organigrama/services/organigramaEstructuralService";
 
 import "./OrganigramaEstructural.css";
 

@@ -1,12 +1,11 @@
 import { Handle, Position } from "@xyflow/react";
-
 import "./NodoEstructural.css";
 
 export default function NodoEstructural({ data }) {
   const {
     tipo,
-    nombreSector,
-    nombrePersona,
+    nombreSector = "",
+    nombrePersona = "",
     opcionesGerencias = [],
     gerenciaId = "",
     onCambiarCampo,
@@ -14,11 +13,7 @@ export default function NodoEstructural({ data }) {
   } = data;
 
   const esDirectorEjecutivo = tipo === "directorEjecutivo";
-
-  const esDirector = tipo === "director";
-
   const esGerencia = tipo === "gerencia";
-
   const esJefatura = tipo === "jefatura";
 
   const tituloTipo = {
@@ -40,9 +35,8 @@ export default function NodoEstructural({ data }) {
         {(esGerencia || esJefatura) && onEliminar && (
           <button
             type="button"
-            className="nodo-estructural__eliminar"
+            className="nodo-estructural__eliminar nodrag"
             onClick={onEliminar}
-            title={`Eliminar ${tituloTipo}`}
           >
             ×
           </button>
@@ -59,15 +53,6 @@ export default function NodoEstructural({ data }) {
           onChange={(event) =>
             onCambiarCampo("nombreSector", event.target.value)
           }
-          placeholder={
-            esDirectorEjecutivo
-              ? "Dirección Ejecutiva"
-              : esDirector
-                ? "Nombre de la dirección"
-                : esGerencia
-                  ? "Nombre de la gerencia"
-                  : "Nombre de la jefatura"
-          }
         />
       </label>
 
@@ -81,7 +66,6 @@ export default function NodoEstructural({ data }) {
           onChange={(event) =>
             onCambiarCampo("nombrePersona", event.target.value)
           }
-          placeholder="Nombre y apellido"
         />
       </label>
 
