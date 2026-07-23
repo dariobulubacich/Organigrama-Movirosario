@@ -118,6 +118,11 @@
 .organigrama-pagina__mensaje button:hover {
   background: rgba(255, 255, 255, 0.6);
 }
+.organigrama-pagina__acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 @media (max-width: 768px) {
   .organigrama-pagina__encabezado {
     align-items: flex-start;
@@ -144,4 +149,24 @@
   .organigrama-pagina__seccion {
     margin: 0;
   }
+}
+.organigrama-pagina__acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.organigrama-pagina__boton-estructural {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #0f766e;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.organigrama-pagina__boton-estructural:hover {
+  background: #115e59;
 }

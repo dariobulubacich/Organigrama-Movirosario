@@ -1,0 +1,106 @@
+.nodo-estructural {
+  width: 250px;
+  min-height: 190px;
+  padding: 14px;
+  border: 2px solid #64748b;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+  box-sizing: border-box;
+}
+
+.nodo-estructural--directorio {
+  border-color: #7c3aed;
+}
+
+.nodo-estructural--gerente {
+  border-color: #0284c7;
+}
+
+.nodo-estructural--jefe {
+  border-color: #16a34a;
+}
+
+.nodo-estructural__tipo {
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+  color: #0f172a;
+}
+
+.nodo-estructural__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.nodo-estructural__campo span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.nodo-estructural__campo input,
+.nodo-estructural__campo select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.nodo-estructural__campo input:focus,
+.nodo-estructural__campo select:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+.nodo-estructural__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nodo-estructural__encabezado .nodo-estructural__tipo {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.nodo-estructural__eliminar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nodo-estructural--directorEjecutivo {
+  border-color: #7c3aed;
+  background: #faf5ff;
+}
+
+.nodo-estructural--director {
+  border-color: #9333ea;
+}
+
+.nodo-estructural--gerencia {
+  border-color: #0284c7;
+}
+
+.nodo-estructural--jefatura {
+  border-color: #16a34a;
+}

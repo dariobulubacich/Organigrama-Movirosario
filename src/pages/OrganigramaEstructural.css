@@ -1,0 +1,82 @@
+.organigrama-estructural {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.organigrama-estructural__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.organigrama-estructural__barra h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #0f172a;
+}
+
+.organigrama-estructural__barra p {
+  margin: 5px 0 0;
+  color: #64748b;
+}
+
+.organigrama-estructural__barra button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.organigrama-estructural__barra button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.organigrama-estructural__mensaje {
+  margin: 12px 24px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.organigrama-estructural__flow {
+  width: 100%;
+  height: calc(100vh - 100px);
+}
+.organigrama-estructural__acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.organigrama-estructural__acciones button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.organigrama-estructural__acciones button:hover {
+  background: #1d4ed8;
+}
+
+.organigrama-estructural__acciones button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

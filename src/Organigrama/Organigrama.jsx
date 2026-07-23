@@ -10,6 +10,7 @@ import {
   actualizarEmpleado,
   desactivarEmpleado,
 } from "./services/organigramaService";
+import { useNavigate } from "react-router-dom";
 
 import "./organigrama.css";
 
@@ -29,7 +30,7 @@ export default function Organigrama() {
   const [ultimaImportacion, setUltimaImportacion] = useState(null);
 
   const [mensajeOperacion, setMensajeOperacion] = useState(null);
-
+  const navigate = useNavigate();
   /* ============================================================
      IMPORTADOR
   ============================================================ */
@@ -303,17 +304,27 @@ export default function Organigrama() {
           </p>
         </div>
 
-        <button
-          type="button"
-          className="organigrama-pagina__boton-importar"
-          onClick={
-            mostrarImportador
-              ? handleOcultarImportador
-              : handleMostrarImportador
-          }
-        >
-          {mostrarImportador ? "Cerrar importador" : "Importar Excel"}
-        </button>
+        <div className="organigrama-pagina__acciones">
+          <button
+            type="button"
+            className="organigrama-pagina__boton-estructural"
+            onClick={() => navigate("/organigrama-estructural")}
+          >
+            Ir al Organigrama Estructural
+          </button>
+
+          <button
+            type="button"
+            className="organigrama-pagina__boton-importar"
+            onClick={
+              mostrarImportador
+                ? handleOcultarImportador
+                : handleMostrarImportador
+            }
+          >
+            {mostrarImportador ? "Cerrar importador" : "Importar Excel"}
+          </button>
+        </div>
       </header>
 
       {mensajeOperacion && (
